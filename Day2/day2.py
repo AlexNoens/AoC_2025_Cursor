@@ -3,92 +3,54 @@ from locale import atoi
 
 
 def open_file():
-    with open("Day2\\input\\input.txt") as f:
-        line = f.readlines()
-        line[0] = line[0].strip()
-        line = [line[0].split(",")]
-        i = []
-        for ids in line[0]:
-            i.append(ids.split("-"))
-        
-    return i
-
+    with open("Day3\\input\\input.txt") as f:
+        lines = f.readlines()
+        lines = [line.strip() for line in lines]
+        return lines
 
 def part1():
-    ids = open_file()
-    total = 0
-    for id in ids:
-        for i in range(atoi(id[0]), atoi(id[1])+1):
-            string = str(i)
-            length = len(string)
-            mid = length // 2
-            # odd lengths can't have repeated pairs
-            if (length % 2 != 0):
-                continue
-            # check the mirrored parts and compare. If they are the same, add to total
-            if (string[0:(mid)] == string[(mid):length]):
-                total += i
+    battArrays = open_file()
+    total_joltage = 0
+    # Naive approach, check for the higest digit from the left, then check for the highest digit from the right, without crossing the left index.
+    for array in battArrays:
+        max_tens = 0
+        max_ones = 0
+        left_index = 0
+        for i in range(0, len(array)-1):
+            if (atoi(array[i]) > max_tens):
+                max_tens = atoi(array[i])
+                left_index = i
 
-    print(f"Part 1: {total}")
+        for i in range(left_index + 1, len(array)):
+            if (atoi(array[i]) > max_ones):
+                max_ones = atoi(array[i])
+        total_joltage += max_tens*10 + max_ones
 
-def check_mirrored(string):
-    length = len(string)
-    mid = length // 2
-    # odd lengths can't have repeated pairs
-    if (length % 2 != 0):
-        return False
-    # check the mirrored parts and compare. If they are the same, add to total
-    if (string[0:(mid)] == string[(mid):length]):
-        print(f"Mirrored match: {string}")
-        return True
+    print(f"Part 1: {total_joltage}")
 
-def check_all(string):
-    length = len(string)
-    mid = length // 2
-    # Even lengths have been checked by "mirrored", only check odd lengths here
-    if (length % 2 != 0):
-        for i in range(0, length):
-            if (string[i] != string[0]):
-                return False
-        return True
-    else:
-        return False
 
-# Half (mirrored) and all (odd length) have been checked, now check for repeated sequences of any length
-def check_patterns(string):
-    length = len(string)
-    patternFound = True
-    for i in range(2, length//2):
-        patternFound = True
-        if (length%i == 0):
-            pattern = string[0:i]
-            for j in range(0, length//i):
-                if (string[j*i:j*i+i] != pattern):
-                    patternFound = False
-                    break
-            if (patternFound):
-                print(f"Pattern match: {string} with pattern: {pattern}")
-                return patternFound
-    return False
 
 def part2():
-    ids = open_file()
-    total = 0
-    for id in ids:
-        for i in range(atoi(id[0]), atoi(id[1])+1):
-            string = str(i)
-            if (len(string) == 1):
-                continue
-            # Mirrored, and Even all matched
-            if (check_mirrored(string)):
-                total += i
-            # Odd length all matched
-            elif (check_all(string)):
-                total += i
-            # use recursion to check for repeated sequences of any length
-            elif (check_patterns(string)):
-                total += i
-    print(f"Part 2: {total}")
+    battArrays = open_file()
+    total_joltage = 0
+    # Naive approach, check for the higest digit from the left, then move the checking window down.
+    num_batteries = 12
+    batteries = []
+    current_max = 0
+    for array in battArrays:
+        left_index = 0
+        bat = []
+        for current_battery in range(1, num_batteries+1):
+            current_max = 0
+            for i in range(left_index, len(array)-(num_batteries - current_battery)):
+                if (atoi(array[i]) > current_max):
+                    current_max = atoi(array[i])
+                    left_index = i
+            bat.append(array[left_index])
+            left_index += 1
+        batteries.append(atoi("".join(bat)))
+
+    print(f"Part 2: {sum(batteries)}")
 
 if __name__ == "__main__":
     part1()
